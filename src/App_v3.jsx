@@ -354,8 +354,8 @@ export default function AppV3() {
               </tr>
             </thead>
             <tbody>
-              {finalRanking.map((p) => (
-                <tr key={p.name}>
+{finalRanking.slice(0, Math.ceil(finalRanking.length * 0.3)).map((p) => (
+                    <tr key={p.name}>
                   <td style={styles.td}>#{p.rank}</td><td style={styles.td}>{p.name}</td><td style={styles.td}><span style={styles.badge}>{renderRankChange(p.rankChange)}</span></td><td style={styles.td}>{p.reduction}%</td><td style={styles.td}>{p.bonus}%</td><td style={{ ...styles.td, fontWeight: 900 }}>{p.score}%</td>
                 </tr>
               ))}
@@ -370,7 +370,7 @@ export default function AppV3() {
               <tr><th style={styles.th}>Rank</th><th style={styles.th}>Name</th><th style={styles.th}>Reduction</th><th style={styles.th}>Score</th></tr>
             </thead>
             <tbody>
-              {rawRanking.map((p) => (
+              {rawRanking.slice(0, Math.ceil(rawRanking.length * 0.3)).map((p) => (
                 <tr key={p.name}>
                   <td style={styles.td}>#{p.rank}</td><td style={styles.td}>{p.name}</td><td style={styles.td}>{p.reduction}%</td><td style={{ ...styles.td, fontWeight: 900 }}>{p.score}%</td>
                 </tr>
