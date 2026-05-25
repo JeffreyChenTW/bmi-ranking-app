@@ -466,7 +466,13 @@ const availableWeeks = weekColumns
           <div style={styles.sectionTitle}>Prize Zone · Top 30% Without Bonus</div>
           <table style={styles.table}>
             <thead>
-              <tr><th style={styles.th}>Rank</th><th style={styles.th}>Name</th><th style={styles.th}>Reduction</th><th style={styles.th}>Score</th></tr>
+              <tr>
+  <th style={styles.th}>Rank</th>
+  <th style={styles.th}>Name</th>
+  <th style={styles.th}>Change</th>
+  <th style={styles.th}>Reduction</th>
+  <th style={styles.th}>Score</th>
+</tr>
             </thead>
             <tbody>
               {prizeRawRanking.map((p) => (
