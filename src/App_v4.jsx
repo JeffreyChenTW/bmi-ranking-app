@@ -252,7 +252,7 @@ const availableWeeks = weekColumns
         if (baselineBMI == null || currentBMI == null) return null;
 
         const reduction = ((baselineBMI - currentBMI) / baselineBMI) * 100;
-        const bonus = getBonus(baselineBMI);
+        const bonus = getBonus(currentBMI);
         const score = reduction + (includeBonus ? bonus : 0);
 
         return {
