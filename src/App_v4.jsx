@@ -15,6 +15,7 @@ const PRIZE_RATIO = 0.3;
 export default function AppV4() {
   const [records, setRecords] = useState([]);
   const [weeks, setWeeks] = useState([]);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const [selectedWeek, setSelectedWeek] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -216,6 +217,18 @@ const availableWeeks = weekColumns
     loadExcelFromPublic();
   }, []);
 
+  useEffect(() => {
+  const handleResize = () => {
+    setIsMobile(window.innerWidth < 1024);
+  };
+
+  window.addEventListener("resize", handleResize);
+
+  return () => {
+    window.removeEventListener("resize", handleResize);
+  };
+}, []);
+
   const previousWeek = useMemo(() => {
     if (!selectedWeek) return null;
     const currentIndex = weeks.indexOf(selectedWeek);
@@ -307,6 +320,9 @@ const availableWeeks = weekColumns
   const top3 = finalRanking.slice(0, 3);
   const rawTop3 = rawRanking.slice(0, 3);
   const topScore = finalRanking[0]?.score ?? 0;
+  const chartLimit = isMobile ? 5 : 10;
+const finalChartData = finalRanking.slice(0, chartLimit);
+const rawChartData = rawRanking.slice(0, chartLimit);
 
   const styles = {
     page: {
@@ -327,16 +343,39 @@ const availableWeeks = weekColumns
       border: "1px solid rgba(255,255,255,0.7)",
       textAlign: "center",
     },
-    title: { fontSize: 48, fontWeight: 900, margin: 0, letterSpacing: -1 },
+    title: {
+  fontSize: isMobile ? 24 : 48,
+  fontWeight: 900,
+  margin: 0,
+  letterSpacing: -1,
+},
     subtitle: { marginTop: 8, color: "#64748b", fontSize: 18 },
     controls: { display: "flex", gap: 12, marginTop: 24, alignItems: "center", justifyContent: "center", flexWrap: "wrap" },
     select: { padding: "10px 14px", borderRadius: 14, border: "1px solid #cbd5e1", background: "white", fontSize: 15 },
     button: { padding: "10px 14px", borderRadius: 14, border: "1px solid #cbd5e1", background: "white", cursor: "pointer", fontSize: 15 },
-    cardGrid: { display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 16, marginBottom: 24 },
+    cardGrid: {
+  display: "grid",
+  gridTemplateColumns: isMobile
+    ? "1fr 1fr"
+    : "repeat(4, minmax(0, 1fr))",
+  gap: 16,
+  marginBottom: 24,
+},
     statCard: { background: "white", borderRadius: 24, padding: 24, boxShadow: "0 16px 36px rgba(15,23,42,0.08)", textAlign: "center" },
     statLabel: { color: "#64748b", fontSize: 14 },
-    statValue: { fontSize: 34, fontWeight: 900, marginTop: 8 },
-    podium: { display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 16, marginBottom: 24 },
+    statValue: {
+  fontSize: isMobile ? 26 : 34,
+  fontWeight: 900,
+  marginTop: 8,
+},
+    podium: {
+  display: "grid",
+  gridTemplateColumns: isMobile
+    ? "1fr"
+    : "repeat(3, minmax(0, 1fr))",
+  gap: 16,
+  marginBottom: 24,
+},
     podiumCard: { background: "white", borderRadius: 28, padding: 26, textAlign: "center", boxShadow: "0 20px 45px rgba(15,23,42,0.10)" },
     medal: { fontSize: 32, marginBottom: 8 },
     section: { background: "white", borderRadius: 28, padding: 24, boxShadow: "0 16px 36px rgba(15,23,42,0.08)", marginBottom: 24 },
@@ -404,11 +443,19 @@ const availableWeeks = weekColumns
           ))}
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+        <div
+  style={{
+    display: "grid",
+    gridTemplateColumns: isMobile
+      ? "1fr"
+      : "1fr 1fr",
+    gap: 24,
+  }}
+>
           <div style={styles.section}>
-            <div style={styles.sectionTitle}>Top 10 Final Ranking</div>
+            <div style={styles.sectionTitle}>Top {chartLimit} Final Ranking</div>
             <ResponsiveContainer width="100%" height={340}>
-              <BarChart data={finalRanking.slice(0, 10)}>
+              <BarChart data={finalChartData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" interval={0} angle={-30} textAnchor="end" height={70} />
                 <YAxis />
@@ -419,9 +466,9 @@ const availableWeeks = weekColumns
           </div>
 
           <div style={styles.section}>
-            <div style={styles.sectionTitle}>Top 10 Without Bonus</div>
+            <div style={styles.sectionTitle}>Top {chartLimit} Without Bonus</div>
             <ResponsiveContainer width="100%" height={340}>
-              <BarChart data={rawRanking.slice(0, 10)}>
+              <BarChart data={rawChartData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" interval={0} angle={-30} textAnchor="end" height={70} />
                 <YAxis />
@@ -436,26 +483,45 @@ const availableWeeks = weekColumns
           <div style={styles.sectionTitle}>Prize Zone · Top 30% Final Ranking</div>
           <table style={styles.table}>
             <thead>
-              <tr>
-  <th style={styles.th}>Rank</th>
-  <th style={styles.th}>Name</th>
-  <th style={styles.th}>Change</th>
-  <th style={styles.th}>Reduction</th>
-  <th style={styles.th}>Score</th>
-</tr>
-            </thead>
+  <tr>
+    <th style={styles.th}>Rank</th>
+    <th style={styles.th}>Name</th>
+    <th style={styles.th}>Change</th>
+
+    {!isMobile && (
+      <th style={styles.th}>Reduction</th>
+    )}
+
+    <th style={styles.th}>Score</th>
+  </tr>
+</thead>
             <tbody>
               {prizeFinalRanking.map((p) => (
                 <tr key={p.name}>
   <td style={styles.td}>#{p.rank}</td>
+
   <td style={styles.td}>{p.name}</td>
+
   <td style={styles.td}>
     <span style={styles.badge}>
       {renderRankChange(p.rankChange)}
     </span>
   </td>
-  <td style={styles.td}>{p.reduction}%</td>
-  <td style={{ ...styles.td, fontWeight: 900 }}>{p.score}%</td>
+
+  {!isMobile && (
+    <td style={styles.td}>
+      {p.reduction}%
+    </td>
+  )}
+
+  <td
+    style={{
+      ...styles.td,
+      fontWeight: 900,
+    }}
+  >
+    {p.score}%
+  </td>
 </tr>
               ))}
             </tbody>
@@ -470,7 +536,11 @@ const availableWeeks = weekColumns
   <th style={styles.th}>Rank</th>
   <th style={styles.th}>Name</th>
   <th style={styles.th}>Change</th>
-  <th style={styles.th}>Reduction</th>
+
+  {!isMobile && (
+    <th style={styles.th}>Reduction</th>
+  )}
+
   <th style={styles.th}>Score</th>
 </tr>
             </thead>
@@ -478,14 +548,29 @@ const availableWeeks = weekColumns
               {prizeRawRanking.map((p) => (
                 <tr key={p.name}>
   <td style={styles.td}>#{p.rank}</td>
+
   <td style={styles.td}>{p.name}</td>
+
   <td style={styles.td}>
     <span style={styles.badge}>
       {renderRankChange(p.rankChange)}
     </span>
   </td>
-  <td style={styles.td}>{p.reduction}%</td>
-  <td style={{ ...styles.td, fontWeight: 900 }}>{p.score}%</td>
+
+  {!isMobile && (
+    <td style={styles.td}>
+      {p.reduction}%
+    </td>
+  )}
+
+  <td
+    style={{
+      ...styles.td,
+      fontWeight: 900,
+    }}
+  >
+    {p.score}%
+  </td>
 </tr>
               ))}
             </tbody>
