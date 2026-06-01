@@ -385,8 +385,87 @@ const rawChartData = rawRanking.slice(0, chartLimit);
     td: { padding: "13px 10px", borderBottom: "1px solid #f1f5f9" },
     badge: { padding: "5px 10px", borderRadius: 999, background: "#eff6ff", color: "#2563eb", fontWeight: 700, display: "inline-block" },
     privacyBadge: { padding: "5px 10px", borderRadius: 999, background: "#fdf2f8", color: "#be185d", fontWeight: 700, display: "inline-block" },
+    mobileTop3List: {
+  display: "flex",
+  flexDirection: "column",
+  gap: 12,
+  marginBottom: 24,
+},
+
+mobileTop3Row: {
+  background: "white",
+  borderRadius: 22,
+  padding: "16px 18px",
+  boxShadow: "0 12px 28px rgba(15,23,42,0.08)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+},
+
+mobileRankingList: {
+  display: "flex",
+  flexDirection: "column",
+  gap: 8,
+},
+
+mobileRankingRow: {
+  background: "white",
+  borderRadius: 16,
+  padding: "12px 14px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  border: "1px solid #eef2f7",
+},
     error: { marginTop: 14, color: "#dc2626", fontWeight: 700 },
   };
+
+  const renderMobileTop3 = (ranking) => (
+  <div style={styles.mobileTop3List}>
+    {ranking.map((p, i) => (
+      <div key={p.name} style={styles.mobileTop3Row}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ fontSize: 30 }}>
+            {i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉"}
+          </div>
+
+          <div>
+            <div style={{ fontSize: 14, color: "#64748b" }}>#{p.rank}</div>
+            <div style={{ fontSize: 22, fontWeight: 900 }}>{p.name}</div>
+          </div>
+        </div>
+
+        <div style={{ textAlign: "right" }}>
+          <div style={{ fontSize: 28, fontWeight: 900 }}>{p.score}%</div>
+          <div style={{ color: "#64748b" }}>
+            {renderRankChange(p.rankChange)}
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+const renderMobileRanking = (ranking) => (
+  <div style={styles.mobileRankingList}>
+    {ranking.map((p) => (
+      <div key={p.name} style={styles.mobileRankingRow}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ width: 42, fontWeight: 800, color: "#64748b" }}>
+            #{p.rank}
+          </div>
+
+          <div style={{ fontWeight: 800 }}>{p.name}</div>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <span style={styles.badge}>{renderRankChange(p.rankChange)}</span>
+          <div style={{ fontWeight: 900 }}>{p.score}%</div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
 
   return (
     <div style={styles.page}>
@@ -417,6 +496,9 @@ const rawChartData = rawRanking.slice(0, chartLimit);
           <div style={styles.statCard}><div style={styles.statLabel}>Top Score</div><div style={styles.statValue}>{topScore.toFixed(2)}%</div></div>
         </div>
 
+        {isMobile ? (
+  renderMobileTop3(top3)
+) : (
         <div style={styles.podium}>
           {top3.map((p, i) => (
             <div key={p.name} style={styles.podiumCard}>
@@ -429,19 +511,28 @@ const rawChartData = rawRanking.slice(0, chartLimit);
             </div>
           ))}
         </div>
-
+)}
         <div style={styles.sectionTitle}>Top 3 Without Bonus</div>
-        <div style={styles.podium}>
-          {rawTop3.map((p, i) => (
-            <div key={p.name} style={styles.podiumCard}>
-              <div style={styles.medal}>{i === 0 ? "🏅" : i === 1 ? "🎖️" : "⭐"}</div>
-              <div style={{ fontSize: 18, color: "#64748b" }}>#{p.rank}</div>
-              <div style={{ fontSize: 28, fontWeight: 900 }}>{p.name}</div>
-              <div style={{ fontSize: 38, fontWeight: 900, marginTop: 8 }}>{p.score}%</div>
-              <div style={{ marginTop: 8, color: "#64748b" }}>w/o bonus</div>
-            </div>
-          ))}
+
+{isMobile ? (
+  renderMobileTop3(rawTop3)
+) : (
+  <div style={styles.podium}>
+    {rawTop3.map((p, i) => (
+      <div key={p.name} style={styles.podiumCard}>
+        <div style={styles.medal}>
+          {i === 0 ? "🏅" : i === 1 ? "🎖️" : "⭐"}
         </div>
+        <div style={{ fontSize: 18, color: "#64748b" }}>#{p.rank}</div>
+        <div style={{ fontSize: 28, fontWeight: 900 }}>{p.name}</div>
+        <div style={{ fontSize: 38, fontWeight: 900, marginTop: 8 }}>
+          {p.score}%
+        </div>
+        <div style={{ marginTop: 8, color: "#64748b" }}>w/o bonus</div>
+      </div>
+    ))}
+  </div>
+)}
 
         <div
   style={{
@@ -481,6 +572,10 @@ const rawChartData = rawRanking.slice(0, chartLimit);
 
         <div style={styles.section}>
           <div style={styles.sectionTitle}>Prize Zone · Top 30% Final Ranking</div>
+          
+          {isMobile ? (
+  renderMobileRanking(prizeFinalRanking.slice(3))
+) : (
           <table style={styles.table}>
             <thead>
   <tr>
@@ -526,10 +621,16 @@ const rawChartData = rawRanking.slice(0, chartLimit);
               ))}
             </tbody>
           </table>
+)}
+
         </div>
 
         <div style={styles.section}>
           <div style={styles.sectionTitle}>Prize Zone · Top 30% Without Bonus</div>
+          
+          {isMobile ? (
+  renderMobileRanking(prizeRawRanking.slice(3))
+) : (
           <table style={styles.table}>
             <thead>
               <tr>
@@ -575,6 +676,9 @@ const rawChartData = rawRanking.slice(0, chartLimit);
               ))}
             </tbody>
           </table>
+          )}
+
+
         </div>
       </div>
     </div>
