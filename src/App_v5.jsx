@@ -365,8 +365,76 @@ const championLeaders = Object.entries(championCount)
     wins,
   }))
   .sort((a, b) => b.wins - a.wins);
+const raceWeeks = weeks.filter((week) => week !== "Week1");
+
+const racePlayerNames = finalRanking
+  .slice(0, 5)
+  .map((p) => p.name);
+
+const rankingTraceData = racePlayerNames.map((name) => {
+  const weeklyRanks = raceWeeks.map((week) => {
+    const ranking = buildRanking(week, true);
+    const player = ranking.find((p) => p.name === name);
+
+    return {
+      week,
+      rank: player ? player.rank : null,
+      score: player ? player.score : null,
+    };
+    
+  });
+
+
+
+
+  const firstRank = weeklyRanks.find((x) => x.rank !== null)?.rank ?? null;
+  const latestRank =
+    [...weeklyRanks].reverse().find((x) => x.rank !== null)?.rank ?? null;
+
+  const movement =
+    firstRank !== null && latestRank !== null
+      ? firstRank - latestRank
+      : null;
+
+  return {
+    name,
+    weeklyRanks,
+    firstRank,
+    latestRank,
+    movement,
+  };
+});
+
+const getRaceStory = (player) => {
+  if (player.latestRank === 1) {
+    return "👑 Champion";
+  }
+
+  if (player.movement >= 5) {
+    return "🚀 Rising";
+  }
+
+  if (player.movement >= 2) {
+    return "🔥 Hot";
+  }
+
+  if (player.latestRank <= 3) {
+    return "⚔️ Challenger";
+  }
+
+  return "🛡 Stable";
+};  
+
+const currentChampion = finalRanking[0] || null;
+
+const currentChampionWins =
+  currentChampion
+    ? championCount[currentChampion.name] || 0
+    : 0;
 
 const topScore = finalRanking[0]?.score ?? 0;
+
+
 
 const chartLimit = isMobile ? 5 : 10;
 const finalChartData = finalRanking.slice(0, chartLimit);
@@ -520,6 +588,92 @@ championWins: {
   color: "#2563eb",
 },
 
+championBanner: {
+  background: "linear-gradient(135deg, #fff7ed 0%, #fffbeb 100%)",
+  border: "1px solid #fed7aa",
+  borderRadius: 28,
+  padding: isMobile ? 18 : 26,
+  marginBottom: 24,
+  boxShadow: "0 16px 36px rgba(251,146,60,0.12)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 16,
+  flexDirection: isMobile ? "column" : "row",
+  textAlign: isMobile ? "center" : "left",
+},
+
+championBannerTitle: {
+  fontSize: isMobile ? 15 : 16,
+  fontWeight: 900,
+  color: "#92400e",
+  letterSpacing: 0.5,
+},
+
+championBannerName: {
+  fontSize: isMobile ? 34 : 44,
+  fontWeight: 950,
+  color: "#111827",
+  lineHeight: 1,
+  marginTop: 8,
+},
+
+championBannerMeta: {
+  color: "#92400e",
+  fontWeight: 800,
+  marginTop: 8,
+},
+
+championBannerScore: {
+  fontSize: isMobile ? 34 : 44,
+  fontWeight: 950,
+  color: "#b45309",
+},
+
+raceTable: {
+  width: "100%",
+  borderCollapse: "collapse",
+  fontSize: isMobile ? 13 : 15,
+},
+
+raceTh: {
+  textAlign: "center",
+  padding: "10px 8px",
+  color: "#64748b",
+  borderBottom: "1px solid #e5e7eb",
+  whiteSpace: "nowrap",
+},
+
+raceTd: {
+  textAlign: "center",
+  padding: "10px 8px",
+  borderBottom: "1px solid #f1f5f9",
+  whiteSpace: "nowrap",
+},
+
+raceNameCell: {
+  textAlign: "left",
+  fontWeight: 900,
+  padding: "10px 8px",
+  borderBottom: "1px solid #f1f5f9",
+  whiteSpace: "nowrap",
+},
+
+raceMovementUp: {
+  color: "#2563eb",
+  fontWeight: 900,
+},
+
+raceMovementDown: {
+  color: "#dc2626",
+  fontWeight: 900,
+},
+
+raceMovementFlat: {
+  color: "#64748b",
+  fontWeight: 900,
+},
+
 error: {
   marginTop: 14,
   color: "#dc2626",
@@ -597,6 +751,28 @@ const renderMobileRanking = (ranking) => (
           {error && <div style={styles.error}>⚠ {error}</div>}
         </div>
 
+        {currentChampion && (
+  <div style={styles.championBanner}>
+    <div>
+      <div style={styles.championBannerTitle}>
+        🏆 Current Champion
+      </div>
+
+      <div style={styles.championBannerName}>
+        {currentChampion.name}
+      </div>
+
+      <div style={styles.championBannerMeta}>
+        {selectedWeek} Champion · {currentChampionWins}{" "}
+        {currentChampionWins > 1 ? "Wins" : "Win"}
+      </div>
+    </div>
+
+    <div style={styles.championBannerScore}>
+      {currentChampion.score}%
+    </div>
+  </div>
+)}
         <div style={styles.cardGrid}>
   <div style={styles.statCard}>
     <div style={styles.statLabel}>Players</div>
@@ -655,6 +831,51 @@ const renderMobileRanking = (ranking) => (
   </div>
 </div>
 
+<div style={styles.card}>
+  <div style={styles.sectionTitle}>
+    🏁 Top 5 Race
+  </div>
+
+  <div style={{ overflowX: isMobile ? "auto" : "visible" }}>
+    <table style={styles.raceTable}>
+      <thead>
+        <tr>
+          <th style={{ ...styles.raceTh, textAlign: "left" }}>
+            Name
+          </th>
+
+          {raceWeeks.map((week) => (
+            <th key={week} style={styles.raceTh}>
+              {week.replace("Week", "W")}
+            </th>
+          ))}
+
+          <th style={styles.raceTh}>Story</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {rankingTraceData.map((p) => (
+          <tr key={p.name}>
+            <td style={styles.raceNameCell}>
+              {p.name}
+            </td>
+
+            {p.weeklyRanks.map((w) => (
+              <td key={w.week} style={styles.raceTd}>
+                {w.rank ? `#${w.rank}` : "-"}
+              </td>
+            ))}
+
+            <td style={styles.raceTd}>
+  {getRaceStory(p)}
+</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
 
 {isMobile ? (
   renderMobileTop3(top3)
