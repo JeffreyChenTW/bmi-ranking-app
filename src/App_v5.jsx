@@ -432,6 +432,8 @@ const currentChampionWins =
     ? championCount[currentChampion.name] || 0
     : 0;
 
+
+
 const topScore = finalRanking[0]?.score ?? 0;
 
 
@@ -588,47 +590,6 @@ championWins: {
   color: "#2563eb",
 },
 
-championBanner: {
-  background: "linear-gradient(135deg, #fff7ed 0%, #fffbeb 100%)",
-  border: "1px solid #fed7aa",
-  borderRadius: 28,
-  padding: isMobile ? 18 : 26,
-  marginBottom: 24,
-  boxShadow: "0 16px 36px rgba(251,146,60,0.12)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  gap: 16,
-  flexDirection: isMobile ? "column" : "row",
-  textAlign: isMobile ? "center" : "left",
-},
-
-championBannerTitle: {
-  fontSize: isMobile ? 15 : 16,
-  fontWeight: 900,
-  color: "#92400e",
-  letterSpacing: 0.5,
-},
-
-championBannerName: {
-  fontSize: isMobile ? 34 : 44,
-  fontWeight: 950,
-  color: "#111827",
-  lineHeight: 1,
-  marginTop: 8,
-},
-
-championBannerMeta: {
-  color: "#92400e",
-  fontWeight: 800,
-  marginTop: 8,
-},
-
-championBannerScore: {
-  fontSize: isMobile ? 34 : 44,
-  fontWeight: 950,
-  color: "#b45309",
-},
 
 raceTable: {
   width: "100%",
@@ -751,33 +712,24 @@ const renderMobileRanking = (ranking) => (
           {error && <div style={styles.error}>⚠ {error}</div>}
         </div>
 
-        {currentChampion && (
-  <div style={styles.championBanner}>
-    <div>
-      <div style={styles.championBannerTitle}>
-        🏆 Current Champion
-      </div>
-
-      <div style={styles.championBannerName}>
-        {currentChampion.name}
-      </div>
-
-      <div style={styles.championBannerMeta}>
-        {selectedWeek} Champion · {currentChampionWins}{" "}
-        {currentChampionWins > 1 ? "Wins" : "Win"}
-      </div>
-    </div>
-
-    <div style={styles.championBannerScore}>
-      {currentChampion.score}%
-    </div>
-  </div>
-)}
+        
         <div style={styles.cardGrid}>
-  <div style={styles.statCard}>
-    <div style={styles.statLabel}>Players</div>
-    <div style={styles.statValue}>{records.length}</div>
+          
+  <div
+  style={{
+    ...styles.statCard,
+    background: "linear-gradient(135deg, #fff7ed, #fffbeb)",
+    border: "1px solid #fed7aa",
+  }}
+>
+  <div style={{ ...styles.statLabel, color: "#92400e", fontWeight: 800 }}>
+    🏆 Champion
   </div>
+
+  <div style={{ ...styles.statValue, color: "#b45309" }}>
+    {currentChampion?.name || "-"}
+  </div>
+</div>
 
   <div style={styles.statCard}>
     <div style={styles.statLabel}>Current Week</div>
@@ -815,7 +767,7 @@ const renderMobileRanking = (ranking) => (
     </div>
 
     <div style={styles.championBox}>
-      <div style={styles.championSubTitle}>Champion Count</div>
+      <div style={styles.championSubTitle}>🏆 Hall of Fame</div>
 
       {championLeaders.map((c, i) => (
         <div key={c.name} style={styles.championItem}>
